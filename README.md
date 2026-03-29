@@ -154,7 +154,8 @@ curl http://localhost:3000/api/payment/balance \
 
 - [API Reference](docs/API.md) - Complete API documentation
 - [Setup Guide](docs/SETUP.md) - Installation and configuration
-- [Architecture](docs/ARCHITECTURE.md) - System design and decisions (TODO)
+- [Architecture](docs/ARCHITECTURE.md) - System design and decisions
+- [Contributing](CONTRIBUTING.md) - How to contribute
 
 ## 🛣️ Roadmap
 
