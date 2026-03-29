@@ -11,6 +11,8 @@ Give your AI agents the ability to spend money autonomously within controlled bu
 [![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)]()
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-blue.svg)]()
 
+🔴 **Live API:** Coming soon (deploying now)
+
 [Features](#features) • [Quick Start](#quick-start) • [API Docs](docs/API.md) • [Setup Guide](docs/SETUP.md)
 
 </div>
