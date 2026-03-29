@@ -23,27 +23,31 @@ async function authenticateAgent(req, res, next) {
       return res.status(429).json({ error: 'Too many requests' });
     }
     
-    // Find key by first 8 chars (prefix)
-    const prefix = apiKey.substring(0, 8);
+    // Get all active keys (we'll verify hash below)
+    // TODO: optimize by storing key prefix separately for faster lookup
     const result = await db.query(
       `SELECT ak.*, u.balance_cents, u.is_active as user_active 
        FROM agent_keys ak 
        JOIN users u ON ak.user_id = u.id 
-       WHERE ak.key_hash LIKE $1 AND ak.is_active = true`,
-      [`${prefix}%`]
+       WHERE ak.is_active = true`
     );
     
     if (result.rows.length === 0) {
       return res.status(401).json({ error: 'Invalid API key' });
     }
     
-    // Verify full key hash
+    // Verify key hash (brute force for now, optimize later)
     let validKey = null;
     for (const row of result.rows) {
-      const match = await bcrypt.compare(apiKey, row.key_hash);
-      if (match) {
-        validKey = row;
-        break;
+      try {
+        const match = await bcrypt.compare(apiKey, row.key_hash);
+        if (match) {
+          validKey = row;
+          break;
+        }
+      } catch (err) {
+        // Invalid hash format, skip
+        continue;
       }
     }
     
