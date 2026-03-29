@@ -13,3 +13,5 @@ build/
 *~
 coverage/
 .nyc_output/
+scripts/post_tweet.py
+scripts/post_thread.py
