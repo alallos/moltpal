@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoltPal Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .user-info {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card h3 {
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .card {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .card h2 {
+            margin-bottom: 16px;
+            color: #333;
+        }
+        
+        .button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+        
+        .button:hover {
+            background: #5568d3;
+        }
+        
+        .button-secondary {
+            background: #e5e7eb;
+            color: #333;
+        }
+        
+        .button-secondary:hover {
+            background: #d1d5db;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        th {
+            font-weight: 600;
+            color: #666;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .badge-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .badge-inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        input[type="text"],
+        input[type="email"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .error {
+            color: #dc2626;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+        
+        .success {
+            color: #059669;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+        
+        .loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔥 MoltPal Dashboard</h1>
+            <div class="user-info">
+                <span id="user-email">Loading...</span>
+            </div>
+        </header>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Balance</h3>
+                <div class="stat-value" id="balance">$0.00</div>
+            </div>
+            <div class="stat-card">
+                <h3>Active Agents</h3>
+                <div class="stat-value" id="active-agents">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Spent</h3>
+                <div class="stat-value" id="total-spent">$0.00</div>
+            </div>
+            <div class="stat-card">
+                <h3>Transactions</h3>
+                <div class="stat-value" id="total-transactions">0</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Agent API Keys</h2>
+            <button class="button" onclick="showCreateKeyModal()">+ Create New Key</button>
+            <table id="keys-table" style="margin-top: 20px;">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Created</th>
+                        <th>Last Used</th>
+                        <th>Daily Limit</th>
+                        <th>Spent Today</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="keys-tbody">
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #9ca3af;">
+                            No API keys yet. Create one to get started.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="card">
+            <h2>Recent Transactions</h2>
+            <table id="transactions-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Agent</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="transactions-tbody">
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 40px; color: #9ca3af;">
+                            No transactions yet.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Create Key Modal -->
+    <div id="create-key-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 20px;">Create Agent API Key</h2>
+            <form id="create-key-form">
+                <div class="form-group">
+                    <label>Agent Name</label>
+                    <input type="text" id="key-name" required placeholder="e.g., Production Agent">
+                </div>
+                <div class="form-group">
+                    <label>Per-Transaction Limit (cents)</label>
+                    <input type="number" id="key-per-tx" placeholder="10000 = $100.00">
+                </div>
+                <div class="form-group">
+                    <label>Daily Limit (cents)</label>
+                    <input type="number" id="key-daily" placeholder="50000 = $500.00">
+                </div>
+                <div class="form-group">
+                    <label>Monthly Limit (cents)</label>
+                    <input type="number" id="key-monthly" placeholder="200000 = $2000.00">
+                </div>
+                <div id="modal-message"></div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="button">Create Key</button>
+                    <button type="button" class="button button-secondary" onclick="hideCreateKeyModal()">Cancel</button>
+                </div>
+            </form>
+            <div id="new-key-display" style="display: none; margin-top: 20px;">
+                <p style="font-weight: 600; color: #059669;">✅ API Key Created!</p>
+                <p style="margin-top: 10px; font-size: 0.9rem; color: #dc2626;">Save this now - you won't see it again:</p>
+                <input type="text" id="new-api-key" readonly style="margin-top: 10px; font-family: monospace;">
+                <button class="button" style="margin-top: 10px;" onclick="copyApiKey()">Copy Key</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = '/api';
+        let userId = localStorage.getItem('moltpal_user_id');
+        
+        // Initialize
+        if (!userId) {
+            // For demo, create a user automatically
+            // In production, this would be a proper auth flow
+            fetch(`${API_BASE}/user/create`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: 'demo@moltpal.dev' })
+            })
+            .then(r => r.json())
+            .then(data => {
+                userId = data.user.id;
+                localStorage.setItem('moltpal_user_id', userId);
+                loadDashboard();
+            });
+        } else {
+            loadDashboard();
+        }
+        
+        async function loadDashboard() {
+            await Promise.all([
+                loadUserInfo(),
+                loadStats(),
+                loadKeys(),
+                loadTransactions()
+            ]);
+        }
+        
+        async function loadUserInfo() {
+            const res = await fetch(`${API_BASE}/user/${userId}`);
+            const data = await res.json();
+            document.getElementById('user-email').textContent = data.user.email;
+            document.getElementById('balance').textContent = formatMoney(data.user.balance_cents);
+        }
+        
+        async function loadStats() {
+            const res = await fetch(`${API_BASE}/user/${userId}/stats`);
+            const data = await res.json();
+            document.getElementById('total-spent').textContent = formatMoney(data.all_time.spent);
+            document.getElementById('total-transactions').textContent = data.all_time.transactions;
+        }
+        
+        async function loadKeys() {
+            const res = await fetch(`${API_BASE}/agent/keys/${userId}`);
+            const data = await res.json();
+            
+            const tbody = document.getElementById('keys-tbody');
+            if (data.keys.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #9ca3af;">No API keys yet. Create one to get started.</td></tr>';
+                document.getElementById('active-agents').textContent = '0';
+                return;
+            }
+            
+            const activeCount = data.keys.filter(k => k.is_active).length;
+            document.getElementById('active-agents').textContent = activeCount;
+            
+            tbody.innerHTML = data.keys.map(key => `
+                <tr>
+                    <td>${key.name}</td>
+                    <td>${formatDate(key.created_at)}</td>
+                    <td>${key.last_used_at ? formatDate(key.last_used_at) : 'Never'}</td>
+                    <td>${formatMoney(key.limits.daily)}</td>
+                    <td>${formatMoney(key.spent.today)}</td>
+                    <td><span class="badge ${key.is_active ? 'badge-active' : 'badge-inactive'}">${key.is_active ? 'Active' : 'Inactive'}</span></td>
+                    <td><button class="button button-secondary" onclick="deactivateKey('${key.id}')" ${!key.is_active ? 'disabled' : ''}>Deactivate</button></td>
+                </tr>
+            `).join('');
+        }
+        
+        async function loadTransactions() {
+            const res = await fetch(`${API_BASE}/user/${userId}/transactions?limit=20`);
+            const data = await res.json();
+            
+            const tbody = document.getElementById('transactions-tbody');
+            if (data.transactions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #9ca3af;">No transactions yet.</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = data.transactions.map(tx => `
+                <tr>
+                    <td>${formatDate(tx.created_at)}</td>
+                    <td>${tx.agent_name || 'Unknown'}</td>
+                    <td>${tx.description}</td>
+                    <td>${formatMoney(tx.amount_cents)}</td>
+                    <td><span class="badge badge-active">${tx.status}</span></td>
+                </tr>
+            `).join('');
+        }
+        
+        function showCreateKeyModal() {
+            document.getElementById('create-key-modal').classList.add('active');
+        }
+        
+        function hideCreateKeyModal() {
+            document.getElementById('create-key-modal').classList.remove('active');
+            document.getElementById('create-key-form').reset();
+            document.getElementById('new-key-display').style.display = 'none';
+        }
+        
+        document.getElementById('create-key-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const form = e.target;
+            form.classList.add('loading');
+            
+            const data = {
+                user_id: userId,
+                name: document.getElementById('key-name').value,
+                limit_per_transaction: parseInt(document.getElementById('key-per-tx').value) || null,
+                limit_daily: parseInt(document.getElementById('key-daily').value) || null,
+                limit_monthly: parseInt(document.getElementById('key-monthly').value) || null
+            };
+            
+            try {
+                const res = await fetch(`${API_BASE}/agent/keys`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await res.json();
+                
+                if (res.ok) {
+                    form.style.display = 'none';
+                    document.getElementById('new-key-display').style.display = 'block';
+                    document.getElementById('new-api-key').value = result.key.api_key;
+                    await loadKeys();
+                } else {
+                    document.getElementById('modal-message').innerHTML = `<p class="error">${result.error}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('modal-message').innerHTML = `<p class="error">Failed to create key</p>`;
+            }
+            
+            form.classList.remove('loading');
+        });
+        
+        function copyApiKey() {
+            const input = document.getElementById('new-api-key');
+            input.select();
+            document.execCommand('copy');
+            alert('API key copied to clipboard!');
+        }
+        
+        async function deactivateKey(keyId) {
+            if (!confirm('Deactivate this API key? This cannot be undone.')) return;
+            
+            await fetch(`${API_BASE}/agent/keys/${keyId}`, { method: 'DELETE' });
+            await loadKeys();
+        }
+        
+        function formatMoney(cents) {
+            return `$${(cents / 100).toFixed(2)}`;
+        }
+        
+        function formatDate(dateStr) {
+            return new Date(dateStr).toLocaleDateString();
+        }
+    </script>
+</body>
+</html>

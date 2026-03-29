@@ -46,7 +46,8 @@ cd moltpal
 docker-compose up -d
 ```
 
-API available at: `http://localhost:3000`
+API available at: `http://localhost:3000`  
+Dashboard: `http://localhost:3000/dashboard.html`
 
 ### Manual Setup
 
